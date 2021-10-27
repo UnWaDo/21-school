@@ -1,2 +1,4 @@
 *.out
 res.output
+*.o
+*.a
