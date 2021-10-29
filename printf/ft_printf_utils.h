@@ -10,14 +10,22 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#ifndef FT_PRINTF_H
-# define FT_PRINTF_H
+#ifndef FT_PRINTF_UTILS_H
+# define FT_PRINTF_UTILS_H
 
-# include <stdarg.h>
 # include <stdint.h>
 # include <stddef.h>
+# include "libft/libft.h"
 
-int	ft_printf(const char *str, ...);
+char	*stringify_char(char value);
+char	*stringify_uint(unsigned int value, int base, const char *symbols);
+char	*stringify_integer(int value, char modifier);
+char	*stringify_pointer(void *value, char modifier);
+char	*stringify_percent();
+int		print_all(t_list **buffer);
+size_t	ptr_len(uintptr_t ptr);
+size_t	uint_len(unsigned int value, int base);
+
 
 # define INTEGER_TYPES "cdiuxX"
 # define POINTER_TYPES "sp"

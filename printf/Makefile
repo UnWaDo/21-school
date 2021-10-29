@@ -1,4 +1,5 @@
-SOURCES = ft_printf.c
+SOURCES = ft_printf.c ft_printf_conversions.c ft_printf_output.c \
+	ft_printf_lengths.c
 SOURCES_BONUS = 
 LIBFT_PATH = ./libft
 LIBFT = $(LIBFT_PATH)/libft.a
@@ -8,21 +9,31 @@ OBJECTS = $(SOURCES:.c=.o)
 OBJECTS_BONUS = $(SOURCES_BONUS:.c=.o)
 CC = gcc
 CFLAGS = -Wall -Wextra -Werror
-.PHONY: all clean fclean re bonus libft test
+.PHONY: all clean fclean re bonus test
 
-$(NAME): $(OBJECTS) libft
-	ar -ruv $(NAME) $(OBJECTS)
+$(NAME): $(OBJECTS) $(LIBFT)
+	@$(eval LIBFT_OBJS = $(shell ar t $(LIBFT) | tr '\n' ' '))
+	@echo $(LIBFT_OBJS) $(OBJECTS) 
+	@ar x $(LIBFT)
+	@ar -crv $(NAME) $(OBJECTS) $(LIBFT_OBJS)
+	@rm $(LIBFT_OBJS)
 
 all: $(NAME)
 
-libft:
+$(LIBFT):
 	make -C $(LIBFT_PATH)
 
 test: $(NAME) main.o
-	$(CC) $(CFLAGS) $(NAME) main.o
+	$(CC) $(CFLAGS) main.o $(NAME)
+	./a.out
 
-%.o: %.c $(HEADERS) libft
-	$(CC) $(CFLAGS) -o $@ -c $*.c
+
+%.o: %.c $(HEADERS)
+	$(CC) $(CFLAGS) -o $@ -c $<
+
+Makefile:	;
+%.c:		;
+%.h:		;
 
 bonus: $(OBJECTS_BONUS)
 	ar -ruv $(NAME) $(OBJECTS_BONUS)

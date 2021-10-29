@@ -2,3 +2,4 @@
 res.output
 *.o
 *.a
+.vscode

@@ -31,7 +31,7 @@ static size_t	number_length(int n)
 	return (str_len);
 }
 
-void	ft_putnbr_fd(int n, int fd)
+size_t	ft_putnbr_fd(int n, int fd)
 {
 	char	buff[12];
 	size_t	str_len;
@@ -52,5 +52,5 @@ void	ft_putnbr_fd(int n, int fd)
 		n /= 10;
 		i++;
 	}
-	ft_putstr_fd(buff, fd);
+	return (ft_putstr_fd(buff, fd));
 }
