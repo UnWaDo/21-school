@@ -19,11 +19,4 @@
 
 int	ft_printf(const char *str, ...);
 
-# define INTEGER_TYPES "cdiuxX"
-# define POINTER_TYPES "sp"
-# define DECIMAL_BASE "0123456789"
-# define HEX_BASE_LOWER "0123456789abcdef"
-# define HEX_BASE_UPPER "0123456789ABCDEF"
-# define NULL_POINTER_REPR "(nil)"
-
 #endif

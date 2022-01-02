@@ -1,4 +1,3 @@
-
 #include "ft_printf_utils.h"
 
 int	print_all(t_list **buffer)

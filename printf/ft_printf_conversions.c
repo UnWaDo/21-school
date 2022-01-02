@@ -1,32 +1,45 @@
 #include "ft_printf.h"
 #include "ft_printf_utils.h"
 
-char	*stringify_pointer(void *value, char modifier)
+static char	*stringify_void_ptr(t_ptr_int value)
 {
-	uintptr_t	ptr;
-	size_t		len;
 	char		*line;
-	char		*symbols;
+	size_t		len;
 
-	symbols = HEX_BASE_LOWER;
-	if (modifier == 's')
-		return (ft_strdup((char *) value));
-	if (value == NULL)
-		return (ft_strdup(NULL_POINTER_REPR));
-	ptr = (uintptr_t) value;
-	len = ptr_len(ptr);
-	len += 2;
+	len = ptr_len(value) + 2;
 	line = malloc(len + 1);
 	if (!line)
 		return (NULL);
 	line[len] = 0;
 	while (len-- > 1)
 	{
-		line[len] = symbols[ptr % 16];
-		ptr /= 16;
+		line[len] = HEX_BASE_LOWER[value % 16];
+		value /= 16;
 	}
 	line[0] = '0';
 	line[1] = 'x';
+	return (line);
+}
+
+static t_arg	adjust_ptr_modifier(void *value, t_arg modifier)
+{
+	modifier.flags &= O_LEFT_JUSTIFICATION;
+	return (modifier);
+}
+
+char	*stringify_pointer(void *value, t_arg modifier)
+{
+	char		*line;
+
+	if (value == NULL)
+		line = ft_strdup(NULL_POINTER_REPR);
+	else if (modifier.type == 's')
+		line = ft_strdup((char *) value);
+	else
+		line = stringify_void_ptr((t_ptr_int) value);
+	modifier = adjust_ptr_modifier(value, modifier);
+	if (line)
+		line = apply_modifiers(line, modifier);
 	return (line);
 }
 
@@ -60,23 +73,38 @@ char	*stringify_uint(unsigned int value, int base, const char *symbols)
 	return (line);
 }
 
-char	*stringify_integer(int value, char modifier)
+static t_arg	adjust_int_modifier(int value, t_arg modifier)
 {
-	if (modifier == 'c')
-		return (stringify_char((char) value));
-	if (modifier == 'd' || modifier == 'i')
-		return (ft_itoa(value));
-	if (modifier == 'u')
-		return (stringify_uint((unsigned int) value, 10, DECIMAL_BASE));
-	if (modifier == 'x')
-		return (stringify_uint((unsigned int) value, 16, HEX_BASE_LOWER));
-	if (modifier == 'X')
-		return (stringify_uint((unsigned int) value, 16, HEX_BASE_UPPER));
-	return (NULL);
-
+	if (value == 0)
+		modifier.flags &= (~O_ALT_FORM);
+	if ((modifier.type == 'd' || modifier.type == 'i') && value < 0)
+		modifier.flags &= (~(O_SIGN_BLANK | O_MANDATORY_SIGN));
+	return (modifier);
 }
 
-char	*stringify_percent()
+char	*stringify_integer(int value, t_arg modifier)
+{
+	char	*line;
+
+	if (modifier.type == 'c')
+		line = stringify_char((char) value);
+	else if (modifier.type == 'd' || modifier.type == 'i')
+		line = ft_itoa(value);
+	else if (modifier.type == 'u')
+		line = stringify_uint((unsigned int) value, 10, DECIMAL_BASE);
+	else if (modifier.type == 'x')
+		line = stringify_uint((unsigned int) value, 16, HEX_BASE_LOWER);
+	else if (modifier.type == 'X')
+		line = stringify_uint((unsigned int) value, 16, HEX_BASE_UPPER);
+	else
+		line = NULL;
+	modifier = adjust_int_modifier(value, modifier);
+	if (line)
+		line = apply_modifiers(line, modifier);
+	return (line);
+}
+
+char	*stringify_percent(void)
 {
 	return (ft_strdup("%"));
 }

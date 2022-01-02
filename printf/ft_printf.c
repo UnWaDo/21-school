@@ -11,10 +11,9 @@
 /* ************************************************************************** */
 
 #include "ft_printf.h"
-#include "libft/libft.h"
 #include "ft_printf_utils.h"
 
-static void add_line(char *line, t_list **buffer)
+static void	add_line(char *line, t_list **buffer)
 {
 	t_list		*new;
 
@@ -43,31 +42,80 @@ static size_t	parse_string(const char *str, t_list **buffer)
 	return (len);
 }
 
+static t_arg	read_arg_format(const char *str, size_t *pos)
+{
+	t_arg	arg_fmt;
+
+	arg_fmt = (t_arg) {.flags = 0, .width = 0, .precision = -1, .type = 0};
+	while (str[*pos])
+	{
+		if (str[*pos] == '#')
+			arg_fmt.flags = arg_fmt.flags | O_ALT_FORM;
+		else if (str[*pos] == '0')
+			arg_fmt.flags = arg_fmt.flags | O_ZERO_PADDED;
+		else if (str[*pos] == '-')
+			arg_fmt.flags = arg_fmt.flags | O_LEFT_JUSTIFICATION;
+		else if (str[*pos] == ' ')
+			arg_fmt.flags = arg_fmt.flags | O_SIGN_BLANK;
+		else if (str[*pos] == '+')
+			arg_fmt.flags = arg_fmt.flags | O_MANDATORY_SIGN;
+		else
+			break ;
+		(*pos)++;
+	}
+	if (ft_isdigit(str[*pos]))
+		arg_fmt.width = ft_atoi(str + *pos);
+	while (str[*pos] && ft_isdigit(str[*pos]))
+		(*pos)++;
+	if (str[*pos] == '.')
+	{
+		arg_fmt.precision = ft_atoi(str + *pos + 1);
+		if (arg_fmt.precision < 0)
+			arg_fmt.precision = 0;
+		(*pos)++;
+		if (str[*pos] == '+' || str[*pos] == '-')
+			(*pos)++;
+		while (ft_isdigit(str[*pos]))
+			(*pos)++;
+	}
+	arg_fmt.type = str[*pos];
+	(*pos)++;
+	return (arg_fmt);
+}
+static size_t	parse_argument(const char *str, va_list *args, t_list **buffer)
+{
+	t_arg	arg_fmt;
+	size_t	pos;
+	char	*line;
+
+	pos = 1;
+	arg_fmt = read_arg_format(str, &pos);
+	if (ft_strchr(INTEGER_TYPES, arg_fmt.type))
+		line = stringify_integer(va_arg(*args, int), arg_fmt);
+	else if (ft_strchr(POINTER_TYPES, arg_fmt.type))
+		line = stringify_pointer(va_arg(*args, void *), arg_fmt);
+	else if (arg_fmt.type == '%')
+		line = stringify_percent();
+	else
+		line = NULL;
+	if (!line)
+		ft_lstclear(buffer, &free);
+	else
+		add_line(line, buffer);
+	return (pos);	
+}
+
 int	ft_printf(const char *str, ...)
 {
 	t_list	*output;
 	va_list	args;
-	char	*line;
 
 	output = NULL;
 	va_start(args, str);
 	while (*str)
 	{
 		if (*str == '%')
-		{
-			line = NULL;
-			if (ft_strchr(INTEGER_TYPES, str[1]))
-				line = stringify_integer(va_arg(args, int), str[1]);
-			else if (ft_strchr(POINTER_TYPES, str[1]))
-				line = stringify_pointer(va_arg(args, void *), str[1]);
-			else if (str[1] == '%')
-				line = stringify_percent();
-			if (!line)
-				ft_lstclear(&output, &free);
-			else
-				add_line(line, &output);
-			str += 2;
-		}
+			str += parse_argument(str, &args, &output);
 		else
 			str += parse_string(str, &output);
 		if (!output)
