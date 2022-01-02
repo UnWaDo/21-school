@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   ft_printf.h                                        :+:      :+:    :+:   */
+/*   ft_printf_utils.h                                  :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: lalex <lalex@students.21-school.ru>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/27 23:24:44 by lalex             #+#    #+#             */
-/*   Updated: 2021/10/27 23:29:36 by lalex            ###   ########.fr       */
+/*   Updated: 2022/01/02 20:17:36 by lalex            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,11 +37,10 @@ size_t	uint_len(unsigned int value, unsigned int base);
 char	*apply_modifiers(char *line, t_arg modifier);
 
 # define INTEGER_TYPES "cdiuxX"
-# define POINTER_TYPES "sp"
 # define DECIMAL_BASE "0123456789"
 # define HEX_BASE_LOWER "0123456789abcdef"
 # define HEX_BASE_UPPER "0123456789ABCDEF"
-# define NULL_POINTER_REPR "(nil)"
+# define NULL_POINTER_REPR "(null)"
 
 # define PRINTF_FLAGS "#0- +"
 # define O_ALT_FORM 0b1

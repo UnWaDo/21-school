@@ -103,8 +103,3 @@ char	*stringify_integer(int value, t_arg modifier)
 		line = apply_modifiers(line, modifier);
 	return (line);
 }
-
-char	*stringify_percent(void)
-{
-	return (ft_strdup("%"));
-}
