@@ -1,13 +1,14 @@
-SOURCES = ft_printf.c ft_printf_conversions.c ft_printf_output.c \
-	ft_printf_lengths.c ft_formatting.c
+SOURCES = ft_printf.c args_int.c \
+	args_other.c args_parsing.c args_utils_general.c \
+	nums_bufferization.c
 LIBFT_PATH = ./libft
 LIBFT = $(LIBFT_PATH)/libft.a
 HEADERS = ft_printf.h ft_printf_utils.h
 NAME = libftprintf.a
 OBJECTS = $(SOURCES:.c=.o)
 CC = gcc
-# CFLAGS = -Wall -Wextra -Werror
-.PHONY: all clean fclean re bonus test
+CFLAGS = -Wall -Wextra -Werror
+.PHONY: all clean fclean re bonus norm
 
 $(NAME): $(OBJECTS) $(LIBFT)
 	@cp $(LIBFT) $(NAME)
@@ -17,11 +18,6 @@ all: $(NAME)
 
 $(LIBFT):
 	make -C $(LIBFT_PATH)
-
-test: $(NAME) main.o
-	@$(CC) $(CFLAGS) main.o $(NAME)
-	@valgrind -q --leak-check=full --track-origins=yes ./a.out
-	@rm ./a.out
 
 %.o: %.c $(HEADERS)
 	$(CC) $(CFLAGS) -o $@ -c $< -I$(LIBFT_PATH)
@@ -37,3 +33,6 @@ fclean: clean
 	rm -f $(NAME)
 
 re: fclean all
+
+norm:
+	norminette $(SOURCES) $(HEADERS)
