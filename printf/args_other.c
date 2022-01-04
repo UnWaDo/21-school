@@ -36,7 +36,7 @@ int	pointer_to_buffer(void *ptr, t_arg arg_fmt, char *buffer, size_t *pos)
 	line = ulong_to_string((unsigned long) ptr, HEX_BASE_LOWER);
 	if (!line)
 		return (0);
-	length = total_num_length((int) ptr, line, arg_fmt);
+	length = total_num_length(0, line, arg_fmt);
 	if (arg_fmt.flags & O_LEFT_JUSTIFICATION)
 	{
 		alt_form_to_buffer(arg_fmt, buffer, pos);

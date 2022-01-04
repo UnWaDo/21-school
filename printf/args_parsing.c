@@ -51,6 +51,16 @@ static int	read_arg_precision(char **str)
 	return (precision);
 }
 
+static t_arg	fix_arg_format(t_arg arg_fmt)
+{
+	if (arg_fmt.precision >= 0 || (arg_fmt.flags & O_LEFT_JUSTIFICATION)
+		|| (!ft_strchr(INTEGER_TYPES, arg_fmt.type)))
+		arg_fmt.flags = arg_fmt.flags & (~O_ZERO_PADDED);
+	if (arg_fmt.flags & O_MANDATORY_SIGN)
+		arg_fmt.flags = arg_fmt.flags & (~O_SIGN_BLANK);
+	return (arg_fmt);
+}
+
 static t_arg	read_arg_format(char **str)
 {
 	t_arg	arg_fmt;
@@ -71,6 +81,7 @@ static t_arg	read_arg_format(char **str)
 	}
 	arg_fmt.type = **str;
 	(*str)++;
+	arg_fmt = fix_arg_format(arg_fmt);
 	return (arg_fmt);
 }
 
@@ -79,7 +90,8 @@ int	parse_argument(char **str, va_list *args, char *buffer, size_t *pos)
 	t_arg	arg_fmt;
 	int		is_ok;
 
-	(*str)++;
+	if (**str)
+		(*str)++;
 	arg_fmt = read_arg_format(str);
 	if (ft_strchr(INTEGER_TYPES, arg_fmt.type))
 		is_ok = int_to_buffer(va_arg(*args, int), arg_fmt, buffer, pos);

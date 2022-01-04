@@ -35,6 +35,7 @@ void	single_char_to_buffer(char c, char *buffer, size_t *pos);
 void	sign_to_buffer(int value, t_arg arg_fmt, char *buffer, size_t *pos);
 
 char	*ulong_to_string(unsigned long value, char *base);
+char	*uint_to_string(unsigned int value, char *base);
 size_t	total_num_length(int value, char *num_line, t_arg arg_fmt);
 
 int		parse_argument(char **str, va_list *args, char *buffer, size_t *pos);
@@ -54,7 +55,7 @@ int		pointer_to_buffer(void *ptr, t_arg arg_fmt, char *buffer, size_t *pos);
 # define O_ZERO_PADDED 			0b10
 # define O_LEFT_JUSTIFICATION	0b100
 # define O_SIGN_BLANK 			0b1000
-# define O_MANDATORY_SIGN		0b1000
+# define O_MANDATORY_SIGN		0b10000
 
 # ifndef BUFFER_SIZE
 #  define BUFFER_SIZE 1000

@@ -24,7 +24,7 @@ void	fill_width(t_arg arg_fmt, size_t val_length, char *buffer, size_t *pos)
 {
 	char	filler;
 
-	if (arg_fmt.flags & O_ZERO_PADDED & (~O_LEFT_JUSTIFICATION))
+	if ((arg_fmt.flags & O_ZERO_PADDED & (~O_LEFT_JUSTIFICATION)))
 		filler = '0';
 	else
 		filler = ' ';

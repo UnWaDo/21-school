@@ -39,10 +39,9 @@ size_t	total_num_length(int value, char *num_line, t_arg arg_fmt)
 	if (arg_fmt.precision >= 0 && (size_t) arg_fmt.precision > num_length)
 		num_length += arg_fmt.precision - num_length;
 	if (arg_fmt.type == 'p' || ((arg_fmt.flags & O_ALT_FORM)
-			&& ((arg_fmt.type == 'x') || (arg_fmt.type == 'X'))))
+			&& (((arg_fmt.type == 'x') || (arg_fmt.type == 'X'))
+				&& (value != 0))))
 		num_length += 2;
-	if (is_positive < 0)
-		num_length++;
 	else if ((is_positive > 0)
 		&& ((arg_fmt.flags & O_MANDATORY_SIGN)
 			|| (arg_fmt.flags & O_SIGN_BLANK)))
@@ -72,10 +71,15 @@ void	num_to_buffer(char *line, t_arg arg_fmt, char *buffer, size_t *pos)
 	size_t	leading_zeros;
 
 	num_length = ft_strlen(line);
+	if (line[0] == '-')
+		num_length--;
 	leading_zeros = 0;
 	if (arg_fmt.precision >= 0 && (size_t) arg_fmt.precision > num_length)
 		leading_zeros = arg_fmt.precision - num_length;
 	while (leading_zeros--)
 		single_char_to_buffer('0', buffer, pos);
-	n_str_symbols_to_buffer(line, num_length, buffer, pos);
+	if (line[0] == '-')
+		n_str_symbols_to_buffer(line + 1, num_length, buffer, pos);
+	else
+		n_str_symbols_to_buffer(line, num_length, buffer, pos);
 }
