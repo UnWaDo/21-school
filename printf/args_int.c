@@ -6,7 +6,7 @@
 /*   By: lalex <lalex@students.21-school.ru>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/03 18:10:37 by lalex             #+#    #+#             */
-/*   Updated: 2022/01/05 15:34:01 by lalex            ###   ########.fr       */
+/*   Updated: 2022/01/05 16:12:10 by lalex            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,6 +17,8 @@ static char	*int_to_string(int value, t_arg arg_fmt)
 {
 	char	*base;
 
+	if (arg_fmt.precision == 0 && value == 0)
+		return (ft_strdup(""));
 	if (arg_fmt.type == 'd' || arg_fmt.type == 'i')
 		return (ft_itoa(value));
 	if (arg_fmt.type == 'x')
