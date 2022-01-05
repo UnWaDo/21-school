@@ -1,6 +1,6 @@
 SOURCES = ft_printf.c args_int.c \
 	args_other.c args_parsing.c args_utils_general.c \
-	nums_bufferization.c
+	nums_bufferization.c unsigned_conversions.c
 LIBFT_PATH = ./libft
 LIBFT = $(LIBFT_PATH)/libft.a
 HEADERS = ft_printf.h ft_printf_utils.h
@@ -10,7 +10,7 @@ CC = gcc
 CFLAGS = -Wall -Wextra -Werror
 .PHONY: all clean fclean re bonus norm
 
-$(NAME): $(OBJECTS) $(LIBFT)
+$(NAME): $(LIBFT) $(OBJECTS)
 	@cp $(LIBFT) $(NAME)
 	@ar -crv $(NAME) $(OBJECTS)
 

@@ -10,7 +10,6 @@ SOURCES = ft_isalpha.c ft_isdigit.c ft_isalnum.c ft_isascii.c \
 HEADERS = libft.h
 NAME = libft.a
 OBJECTS = $(SOURCES:.c=.o)
-OBJECTS_BONUS = $(SOURCES_BONUS:.c=.o)
 EXEC = gcc
 CFLAGS = -Wall -Wextra -Werror
 .PHONY: all clean fclean re bonus
@@ -22,10 +21,6 @@ all: $(NAME)
 
 %.o: %.c $(HEADERS)
 	$(EXEC) $(CFLAGS) -o $@ -c $<
-
-Makefile:	;
-%.c:		;
-%.h:		;
 
 clean:
 	rm -f $(OBJECTS) $(OBJECTS_BONUS)

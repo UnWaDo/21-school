@@ -6,7 +6,7 @@
 /*   By: lalex <lalex@students.21-school.ru>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/03 20:01:45 by lalex             #+#    #+#             */
-/*   Updated: 2022/01/03 20:47:34 by lalex            ###   ########.fr       */
+/*   Updated: 2022/01/05 15:34:16 by lalex            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -49,11 +49,14 @@ size_t	total_num_length(int value, char *num_line, t_arg arg_fmt)
 	return (num_length);
 }
 
-void	sign_to_buffer(int value, t_arg arg_fmt, char *buffer, size_t *pos)
+void	num_prefix_to_buffer(int value, t_arg arg_fmt,
+	char *buffer, size_t *pos)
 {
 	int	is_positive;
 
 	is_positive = check_if_positive(value, arg_fmt);
+	if (value)
+		alt_form_to_buffer(arg_fmt, buffer, pos);
 	if (is_positive < 0)
 		single_char_to_buffer('-', buffer, pos);
 	else if (is_positive > 0)
