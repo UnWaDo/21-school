@@ -6,7 +6,7 @@
 /*   By: lalex <lalex@students.21-school.ru>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/03 20:01:45 by lalex             #+#    #+#             */
-/*   Updated: 2022/01/05 15:34:16 by lalex            ###   ########.fr       */
+/*   Updated: 2022/01/05 16:27:07 by lalex            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,12 +36,16 @@ size_t	total_num_length(int value, char *num_line, t_arg arg_fmt)
 
 	is_positive = check_if_positive(value, arg_fmt);
 	num_length = ft_strlen(num_line);
+	if (num_line[0] == '-')
+		num_length--;
 	if (arg_fmt.precision >= 0 && (size_t) arg_fmt.precision > num_length)
 		num_length += arg_fmt.precision - num_length;
 	if (arg_fmt.type == 'p' || ((arg_fmt.flags & O_ALT_FORM)
 			&& (((arg_fmt.type == 'x') || (arg_fmt.type == 'X'))
 				&& (value != 0))))
 		num_length += 2;
+	else if (is_positive < 0)
+		num_length++;
 	else if ((is_positive > 0)
 		&& ((arg_fmt.flags & O_MANDATORY_SIGN)
 			|| (arg_fmt.flags & O_SIGN_BLANK)))

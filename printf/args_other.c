@@ -6,7 +6,7 @@
 /*   By: lalex <lalex@students.21-school.ru>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/03 18:18:23 by lalex             #+#    #+#             */
-/*   Updated: 2022/01/03 21:06:33 by lalex            ###   ########.fr       */
+/*   Updated: 2022/01/05 16:23:34 by lalex            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -58,10 +58,9 @@ int	string_to_buffer(char *str, t_arg arg_fmt, char *buffer, size_t *pos)
 
 	if (str == NULL)
 		str = NULL_POINTER_REPR;
-	if (arg_fmt.precision >= 0)
+	strlen = ft_strlen(str);
+	if (arg_fmt.precision >= 0 && ((size_t) arg_fmt.precision < strlen))
 		strlen = arg_fmt.precision;
-	else
-		strlen = ft_strlen(str);
 	if (arg_fmt.flags & O_LEFT_JUSTIFICATION)
 		n_str_symbols_to_buffer(str, strlen, buffer, pos);
 	fill_width(arg_fmt, strlen, buffer, pos);
