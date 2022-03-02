@@ -6,22 +6,13 @@
 /*   By: lalex <lalex@students.21-school.ru>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/09 13:41:01 by lalex             #+#    #+#             */
-/*   Updated: 2021/10/13 20:41:47 by lalex            ###   ########.fr       */
+/*   Updated: 2022/03/02 15:48:03 by lalex            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include <stdlib.h>
 #include <stdio.h>
-
-void	clean_strings(char **splitted)
-{
-	size_t	i;
-
-	i = 0;
-	while (splitted[i] != NULL)
-		free(splitted[i++]);
-	free(splitted);
-}
+#include "pipex.h"
 
 static size_t	count_strings(const char *s, char c)
 {

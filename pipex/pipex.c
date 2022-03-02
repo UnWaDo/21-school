@@ -6,9 +6,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include <errno.h>
+#include "pipex.h"
 
-char	**ft_split(char const *s, char c);
-void	clean_strings(char **splitted);
 extern char	**environ;
 
 int	open_input(const char *path)
@@ -110,7 +109,7 @@ char	**parse_command(const char *command)
 	char	*path;
 	int		i;
 
-	args = ft_split(command, ' ');
+	args = split_args(command);
 	if (!args)
 		return (NULL);
 	if (access(args[0], X_OK) != -1)
@@ -240,11 +239,11 @@ void	execute_cmd2(const char *file, const char *command, int in_fd)
 
 int	main(int argc, char** argv)
 {
-	int		fd;
 	pid_t	child;
 	int		fork_status;
 	int		pipe_fds[2];
 
+	print_args(argv);
 	if (argc < 5)
 	{
 		printf("%s: bad usage\nTry '%s file1 cmd1 cmd2 file2'\n", argv[0], argv[0]);
