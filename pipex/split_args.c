@@ -10,8 +10,6 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#include <stdlib.h>
-#include <stdio.h>
 #include "pipex.h"
 
 static	size_t	count_arg_length(const char *s)
@@ -28,11 +26,14 @@ static	size_t	count_arg_length(const char *s)
 			len++;
 			while (s[len] && s[len] != quote)
 				len++;
+			if (s[len] == '\0')
+				break ;
 		}
 		len++;
 	}
 	return (len);
 }
+
 static size_t	count_args(const char *s)
 {
 	size_t	len;
@@ -67,11 +68,10 @@ static size_t	next_arg(const char *s, char **next_arg)
 		i++;
 	}
 	(*next_arg)[i] = 0;
-		printf("%s\n", *next_arg);
 	return (str_len);
 }
 
-static void remove_quotes(char *string)
+static void	remove_quotes(char *string)
 {
 	size_t	i;
 	size_t	shift;
@@ -87,12 +87,14 @@ static void remove_quotes(char *string)
 			c = string[i];
 			shift++;
 			i++;
+			continue ;
 		}
 		else if (c == string[i])
 		{
 			c = 0;
 			shift++;
 			i++;
+			continue ;
 		}
 		string[i - shift] = string[i];
 		i++;

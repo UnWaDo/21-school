@@ -1,95 +1,12 @@
-#include <unistd.h>
 #include <fcntl.h>
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <stdio.h>
-#include <stdlib.h>
 #include <string.h>
 #include <errno.h>
 #include "pipex.h"
 
-extern char	**environ;
-
-int	open_input(const char *path)
-{
-	int	fd;
-
-	fd = open(path, O_RDONLY);
-	if (fd == -1)
-		return (fd);
-	if (dup2(fd, 0) == -1)
-	{
-		close(fd);
-		return (-1);
-	}
-	return (fd);
-}
-
-int	starts_with(char *str1, char *str2)
-{
-	int	i;
-
-	i = 0;
-	while (str1[i] && str2[i] && str1[i] == str2[i])
-		i++;
-	if (str2[i] == '\0')
-		return (1);
-	return (0);
-}
-
-size_t	ft_strlen(const char *str)
-{
-	size_t	len;
-
-	if (!str)
-		return (0);
-	len = 0;
-	while (str[len])
-		len++;
-	return (len);
-}
-
-char	**get_paths()
-{
-	int		i;
-	char	**paths;
-
-	i = 0;
-	while (environ[i] && starts_with(environ[i], "PATH=") == 0)
-		i++;
-	if (environ[i] == NULL)
-		return (NULL);
-	paths = ft_split(environ[i] + ft_strlen("PATH="), ':');
-	return (paths);
-}
-
-char	*path_join(const char *dir, const char *file)
-{
-	size_t	i;
-	size_t	len;
-	char	*path;
-
-	len = ft_strlen(dir) + ft_strlen(file);
-	path = malloc((len + 2) * sizeof(*path));
-	if (!path)
-		return (NULL);
-	path[len + 1] = '\0';
-	i = 0;
-	while (dir[i])
-	{
-		path[i] = dir[i];
-		i++;
-	}
-	path[i] = '/';
-	len = i + 1;
-	while (file[len - i - 1])
-	{
-		path[len] = file[len - i - 1];
-		len++;
-	}
-	return (path);
-}
-
+// TO BE DELETED
 void	print_args(char **args)
 {
 	int	i;
@@ -97,189 +14,158 @@ void	print_args(char **args)
 	i = 0;
 	while (args[i])
 	{
-		printf("%d: %s\n", i, args[i]);
+		printf_min("%d: %s\n", i, args[i]);
 		i++;
 	}
 }
 
-char	**parse_command(const char *command)
+int	execute_cmd(int in_fd, int out_fd, const char *command)
 {
-	char	**args;
-	char	**paths;
-	char	*path;
-	int		i;
+	char	**cmd_args;
+	pid_t	child;
+	int		child_status;
 
-	args = split_args(command);
-	if (!args)
-		return (NULL);
-	if (access(args[0], X_OK) != -1)
-		return (args);
-	paths = get_paths();
-	if (!paths)
+	cmd_args = parse_command(command);
+	if (!cmd_args)
+		return (ARG_PARSING_ERROR);
+	if (dup2(in_fd, 0) == -1 || dup2(out_fd, 1) == -1)
 	{
-		clean_strings(args);
-		return (NULL);
+		clean_strings(cmd_args);
+		return (FD_CHANGE_ERROR);
 	}
-	i = 0;
-	while (paths[i])
+	child = fork();
+	if (child == -1)
+		return (FORK_ERROR);
+	else if (child == 0)
+		execve(cmd_args[0], cmd_args, NULL);
+	wait(&child_status);
+	clean_strings(cmd_args);
+	if (child_status != -1)
+		return (0);
+	return (CHILD_ERROR);
+}
+
+int	execute_cmd1(const char *file, const char *command, int out_fd)
+{
+	int		fd;
+	int		status;
+	pid_t	child;
+
+	child = fork();
+	if (child == -1)
 	{
-		path = path_join(paths[i], args[0]);
-		if (access(path, X_OK) != -1)
+		printf_min(FORK_CREATION_ERROR, strerror(errno));
+		return (EXIT_FAILURE);
+	}
+	else if (child == 0)
+	{
+		fd = open(file, O_RDONLY);
+		if (fd == -1)
 		{
-			free(args[0]);
-			args[0] = path;
-			break ;
+			perror("Error while opening file1");
+			exit(EXIT_FAILURE);
 		}
-		free(path);
-		i++;
+		status = execute_cmd(fd, out_fd, command);
+		close(fd);
+		if (status == 0)
+			exit(EXIT_SUCCESS);
+		perror("Error while executing cmd1");
+		exit(EXIT_FAILURE);
 	}
-	if (paths[i] == NULL)
-	{
-		clean_strings(args);
-		clean_strings(paths);
-		return (NULL);
-	}
-	clean_strings(paths);
-	return (args);
+	wait(&status);
+	close(out_fd);
+	return (status);
 }
 
-void	close_pipe(int pipe_fds[2])
+int	execute_cmd2(const char *file, const char *command, int in_fd)
 {
-	close(pipe_fds[0]);
-	close(pipe_fds[1]);
-}
-
-void	execute_cmd1(const char *file, const char *command, int out_fd)
-{
-	char	**cmd_args;
 	int		fd;
+	int		status;
 	pid_t	child;
-	int		child_status;
 
-	fd = open(file, O_RDONLY);
-	if (fd == -1)
-	{
-		perror("Error while opening file1");
-		exit(EXIT_FAILURE);
-	}
-	cmd_args = parse_command(command);
-	if (!cmd_args)
-	{
-		perror("Error while parsing cmd1");
-		close(fd);
-		exit(EXIT_FAILURE);
-	}
-	if (dup2(fd, 0) == -1 || dup2(out_fd, 1) == -1)
-	{
-		perror("Can't change descriptors");
-		close(fd);
-		clean_strings(cmd_args);
-		exit(EXIT_FAILURE);
-	}
 	child = fork();
 	if (child == -1)
 	{
-		perror("Fork creation failed");
-		exit(EXIT_FAILURE);
+		printf_min(FORK_CREATION_ERROR, strerror(errno));
+		return (EXIT_FAILURE);
 	}
 	else if (child == 0)
-		execve(cmd_args[0], cmd_args, NULL);
-	wait(&child_status);
-	close(fd);
-	clean_strings(cmd_args);
-	if (child_status != -1)
-		exit(EXIT_SUCCESS);
-	perror("Error while executing cmd1");
+	{
+		fd = open(file, O_WRONLY | O_CREAT | O_TRUNC, 0644);
+		if (fd == -1)
+		{
+			perror("Error while opening file2");
+			exit(EXIT_FAILURE);
+		}
+		status = execute_cmd(in_fd, fd, command);
+		close(fd);
+		if (status == 0)
+			exit(EXIT_SUCCESS);
+		perror("Error while executing cmd2");
+		exit(EXIT_FAILURE);
+	}
+	wait(&status);
+	close(in_fd);
+	return (status);
+}
+
+static void	check_args(int argc, char **argv)
+{
+	if (argc == 5)
+		return ;
+	printf_min(BAD_USAGE_ERROR, argv[0]);
 	exit(EXIT_FAILURE);
 }
 
-void	execute_cmd2(const char *file, const char *command, int in_fd)
+static void	check_files(const char *input, const char *output)
 {
-	char	**cmd_args;
-	int		fd;
-	pid_t	child;
-	int		child_status;
+	int	fd;
 
-	fd = open(file, O_WRONLY | O_CREAT | O_TRUNC, 0666);
-	if (fd == -1)
+	fd = open(input, O_RDONLY);
+	if (fd == -1 || read(fd, NULL, 0) < 0)
 	{
-		perror("Error while opening file2");
+		if (fd != -1)
+			close(fd);
+		printf_min(INPUT_FILE_ERROR, input, strerror(errno));
 		exit(EXIT_FAILURE);
 	}
-	cmd_args = parse_command(command);
-	if (!cmd_args)
-	{
-		perror("Error while parsing cmd2");
+	if (fd != -1)
 		close(fd);
+	fd = open(output, O_WRONLY | O_CREAT | O_TRUNC, 0644);
+	if (fd == -1 || write(fd, NULL, 0) == -1)
+	{
+		if (fd != -1)
+			close(fd);
+		printf_min(OUTPUT_FILE_ERROR, output, strerror(errno));
 		exit(EXIT_FAILURE);
 	}
-	if (dup2(in_fd, 0) == -1 || dup2(fd, 1) == -1)
-	{
-		perror("Can't change descriptors");
+	if (fd != -1)
 		close(fd);
-		clean_strings(cmd_args);
-		exit(EXIT_FAILURE);
-	}
-	child = fork();
-	if (child == -1)
-	{
-		perror("Fork creation failed");
-		exit(EXIT_FAILURE);
-	}
-	else if (child == 0)
-		execve(cmd_args[0], cmd_args, NULL);
-	wait(&child_status);
-	close(fd);
-	clean_strings(cmd_args);
-	if (child_status != -1)
-		exit(EXIT_SUCCESS);
-	perror("Error while executing cmd2");
-	exit(EXIT_FAILURE);
 }
 
-int	main(int argc, char** argv)
+int	main(int argc, char **argv, char **envp)
 {
-	pid_t	child;
-	int		fork_status;
 	int		pipe_fds[2];
 
-	print_args(argv);
-	if (argc < 5)
-	{
-		printf("%s: bad usage\nTry '%s file1 cmd1 cmd2 file2'\n", argv[0], argv[0]);
-		exit(EXIT_FAILURE);
-	}
+	check_args(argc, argv);
+	check_files(argv[1], argv[argc - 1]);
 	if (pipe(pipe_fds) == -1)
 	{
-		printf("%s: %s\n", argv[0], strerror(errno));
+		printf_min(PIPE_CREATION_ERROR, strerror(errno));
 		exit(EXIT_FAILURE);
 	}
-	child = fork();
-	if (child == -1)
+	env_path(envp, PATH_INIT);
+	if (execute_cmd1(argv[1], argv[2], pipe_fds[1]) != EXIT_SUCCESS)
 	{
-		printf("Fork is dropped: %s\n", strerror(errno));
-		exit(EXIT_FAILURE);
-	}
-	else if (child == 0)
-		execute_cmd1(argv[1], argv[2], pipe_fds[1]);
-	wait(&fork_status);
-	close(pipe_fds[1]);
-	if (fork_status == -1)
-	{
+		env_path(envp, PATH_CLEAN);
 		close(pipe_fds[0]);
 		exit(EXIT_FAILURE);
 	}
-	child = fork();
-	if (child == -1)
+	if (execute_cmd2(argv[4], argv[3], pipe_fds[0]) != EXIT_SUCCESS)
 	{
-		printf("Fork is dropped: %s\n", strerror(errno));
+		env_path(envp, PATH_CLEAN);
 		exit(EXIT_FAILURE);
 	}
-	else if (child == 0)
-		execute_cmd2(argv[4], argv[3], pipe_fds[0]);
-	wait(&fork_status);
-	close(pipe_fds[0]);
-	if (fork_status == -1)
-		exit(EXIT_FAILURE);
+	env_path(envp, PATH_CLEAN);
 	exit(EXIT_SUCCESS);
 }

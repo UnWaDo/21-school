@@ -1,2 +1,5 @@
 *.out
-
+in
+pipex
+out
+test_out
