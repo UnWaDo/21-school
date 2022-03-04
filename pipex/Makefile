@@ -1,4 +1,6 @@
-SOURCES = pipex.c split_args.c pipex_utils.c ft_split.c paths.c printf_min.c commands.c
+SOURCES = pipex.c split_args.c pipex_utils.c \
+			ft_split.c paths.c printf_min.c commands.c strings.c \
+				forks.c
 HEADERS = pipex.h
 NAME = pipex
 OBJECTS = $(SOURCES:.c=.o)

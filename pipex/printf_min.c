@@ -1,9 +1,21 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   printf_min.c                                       :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: lalex <lalex@students.21-school.ru>        +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2022/03/04 10:32:39 by lalex             #+#    #+#             */
+/*   Updated: 2022/03/04 11:49:08 by lalex            ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include <stdarg.h>
 #include "pipex.h"
 
 static int	print_s(char *str)
 {
-	return (write(1, str, ft_strlen(str)));
+	return (write(2, str, ft_strlen(str)));
 }
 
 static void	reverse_mem(char *mem, size_t len)
@@ -31,7 +43,7 @@ static int	print_d(int d)
 	if (d >= 0)
 		d = -d;
 	else
-		write(1, "-", 1);
+		write(2, "-", 1);
 	len = 1;
 	while (d / 10)
 	{
@@ -41,10 +53,10 @@ static int	print_d(int d)
 	}
 	num[MAX_INT_LEN - len] = -(d % 10) + '0';
 	reverse_mem(num + MAX_INT_LEN - len, len);
-	return (write(1, num + MAX_INT_LEN - len, len));
+	return (write(2, num + MAX_INT_LEN - len, len));
 }
 
-int	printf_min(const char *s, ...)
+int	printf_err(const char *s, ...)
 {
 	va_list	args;
 	size_t	len;
@@ -59,7 +71,7 @@ int	printf_min(const char *s, ...)
 	{
 		if (s[len] == '%')
 		{
-			out += write(1, s + last_out, len - last_out);
+			out += write(2, s + last_out, len - last_out);
 			if (s[len + 1] == 's')
 				out += print_s(va_arg(args, char *));
 			if (s[len + 1] == 'd')
@@ -69,6 +81,6 @@ int	printf_min(const char *s, ...)
 		}
 		len++;
 	}
-	out += write(1, s + last_out, len - last_out);
+	out += write(2, s + last_out, len - last_out);
 	return (out);
 }

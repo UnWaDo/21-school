@@ -6,7 +6,7 @@
 /*   By: lalex <lalex@students.21-school.ru>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/09 13:41:01 by lalex             #+#    #+#             */
-/*   Updated: 2022/03/02 17:10:24 by lalex            ###   ########.fr       */
+/*   Updated: 2022/03/04 11:03:25 by lalex            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -82,17 +82,13 @@ static void	remove_quotes(char *string)
 	i = 0;
 	while (string[i])
 	{
-		if (c == 0 && ft_isquote(string[i]))
+		if ((c == string[i]) || (c == 0 && ft_isquote(string[i])))
 		{
-			c = string[i];
 			shift++;
-			i++;
-			continue ;
-		}
-		else if (c == string[i])
-		{
-			c = 0;
-			shift++;
+			if (c == 0 && ft_isquote(string[i]))
+				c = string[i];
+			else
+				c = 0;
 			i++;
 			continue ;
 		}
