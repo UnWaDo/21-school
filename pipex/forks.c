@@ -6,7 +6,7 @@
 /*   By: lalex <lalex@students.21-school.ru>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/03/04 10:31:51 by lalex             #+#    #+#             */
-/*   Updated: 2022/03/04 11:47:27 by lalex            ###   ########.fr       */
+/*   Updated: 2022/03/23 23:07:39 by lalex            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,7 +15,7 @@
 #include <errno.h>
 #include "pipex.h"
 
-int	execute_cmd(int in_fd, int out_fd, const char *command)
+static int	execute_cmd(int in_fd, int out_fd, const char *command)
 {
 	char	**cmd_args;
 	pid_t	child;
@@ -38,38 +38,44 @@ int	execute_cmd(int in_fd, int out_fd, const char *command)
 	return (child_status);
 }
 
-int	execute_cmd1(const char *file, const char *command, int out_fd)
+static int	execute_middle(int in_fd, char *command, int *status)
 {
-	int		fd;
-	int		status;
+	int	pipe_fds[2];
 
-	fd = open(file, O_RDONLY);
-	if (fd == -1)
+	if (pipe(pipe_fds) == -1)
 	{
-		printf_err(INPUT_FILE_ERROR, file, strerror(errno));
-		return (EXIT_FAILURE);
+		printf_err(PIPE_CREATION_ERROR, strerror(errno));
+		close(in_fd);
+		return (-1);
 	}
-	status = execute_cmd(fd, out_fd, command);
-	close(fd);
-	close(out_fd);
-	return (status);
+	*status = execute_cmd(in_fd, pipe_fds[1], command);
+	close(pipe_fds[1]);
+	close(in_fd);
+	return (pipe_fds[0]);
 }
 
-int	execute_cmd2(const char *file, const char *command, int in_fd)
+int	execute_commands(int in_fd, int out_fd, char **commands, int cmdc)
 {
-	int		fd;
-	int		status;
+	int	fd;
+	int	status;
+	int	i;
 
-	fd = open(file, O_WRONLY | O_CREAT | O_TRUNC, 0644);
+	i = 0;
+	fd = in_fd;
+	while (i < cmdc - 1 && fd != -1)
+	{
+		fd = execute_middle(fd, commands[i], &status);
+		i++;
+	}
 	if (fd == -1)
 	{
-		printf_err(OUTPUT_FILE_ERROR, file, strerror(errno));
+		close(out_fd);
 		return (EXIT_FAILURE);
 	}
-	status = execute_cmd(in_fd, fd, command);
+	status = execute_cmd(fd, out_fd, commands[i]);
 	close(fd);
-	close(in_fd);
+	close(out_fd);
 	if (status != EXIT_SUCCESS)
-		printf_err("Error in cmd2: %s\n", strerror(errno));
-	return (status);
+		return (EXIT_FAILURE);
+	return (EXIT_SUCCESS);
 }

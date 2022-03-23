@@ -6,7 +6,7 @@
 /*   By: lalex <lalex@students.21-school.ru>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/03/02 15:07:41 by lalex             #+#    #+#             */
-/*   Updated: 2022/03/04 11:55:20 by lalex            ###   ########.fr       */
+/*   Updated: 2022/03/23 22:45:07 by lalex            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,12 +34,11 @@ int		printf_err(const char *s, ...);
 char	**env_path(char **envp, int command);
 char	**get_paths(char **envp);
 char	**parse_command(const char *command);
-int		execute_cmd(int in_fd, int out_fd, const char *command);
-int		execute_cmd1(const char *file, const char *command, int out_fd);
-int		execute_cmd2(const char *file, const char *command, int in_fd);
+int		execute_commands(int in_fd, int out_fd, char **commands, int cmdc);
 
 # define BAD_USAGE_ERROR		"Bad usage\nTry '%s file1 cmd1 cmd2 file2'\n"
 # define INPUT_FILE_ERROR		"Invalid input file %s: %s\n"
+# define FILE_ERROR				"pipex: %s: %s\n"
 # define OUTPUT_FILE_ERROR		"Invalid output file %s: %s\n"
 # define PIPE_CREATION_ERROR	"Failed to create pipe: %s\n"
 # define FORK_CREATION_ERROR	"Fork is dropped: %s\n"

@@ -1,17 +1,19 @@
 SOURCES = pipex.c split_args.c pipex_utils.c \
 			ft_split.c paths.c printf_min.c commands.c strings.c \
-				forks.c
+				forks.c gnl_min.c
 HEADERS = pipex.h
 NAME = pipex
 OBJECTS = $(SOURCES:.c=.o)
 CC = gcc
 CFLAGS = -g -Wall -Wextra -Werror
-.PHONY: all clean fclean re norm
+.PHONY: all clean fclean re norm bonus
 
 $(NAME): $(OBJECTS)
 	$(CC) $(CFLAGS) $(OBJECTS) -o $(NAME)
 
 all: $(NAME)
+
+bonus:	$(NAME)
 
 %.o: %.c $(HEADERS)
 	$(CC) $(CFLAGS) -o $@ -c $<
