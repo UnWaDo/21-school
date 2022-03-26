@@ -17,8 +17,7 @@
 #include <string.h>
 #include <errno.h>
 #include "pipex.h"
-
-# define HERE_DOC	"here_doc\n"
+#include "get_next_line.h"
 
 static void	check_args(int argc, char **argv)
 {
@@ -33,23 +32,28 @@ static int	check_file(const char *filename, int flags, int code)
 	int	fd;
 
 	fd = open(filename, flags, code);
-	if (fd < 0)
-		printf_err(FILE_ERROR, strerror(errno), filename);
-	else if ((flags & (O_RDONLY | O_RDWR)) && read(fd, NULL, 0) < 0)
-		printf_err(FILE_ERROR, strerror(errno), filename);
-	else if ((flags & (O_WRONLY | O_RDWR)) && write(fd, NULL, 0) < 0)
-		printf_err(FILE_ERROR, strerror(errno), filename);
-	else
-		return (fd);
-	if (fd > 0)
-		close(fd);
-	return (-1);
+	if (fd < 0
+		|| ((flags & (O_RDONLY | O_RDWR)) && read(fd, NULL, 0) < 0)
+		|| ((flags & (O_WRONLY | O_RDWR)) && write(fd, NULL, 0) < 0))
+		printf_err(FILE_ERROR, filename, strerror(errno));
+	return (fd);
+}
+
+static int	is_limiter(char *limiter, char *line)
+{
+	size_t	i;
+
+	i = 0;
+	while (limiter[i] && line[i] && line[i] == limiter[i])
+		i++;
+	return (limiter[i] == '\0' && line[i] == '\n' && line[i + 1] == '\0');
 }
 
 static int	here_doc(char *limiter)
 {
 	int		pipe_fds[2];
 	char	*line;
+	size_t	line_len;
 
 	if (pipe(pipe_fds) == -1)
 	{
@@ -57,9 +61,18 @@ static int	here_doc(char *limiter)
 		return (-1);
 	}
 	line = get_next_line(0);
-	while (line)	
-	
-	return (-1);
+	line_len = ft_strlen(line);
+	while (line && !is_limiter(limiter, line))
+	{
+		write(pipe_fds[1], line, line_len);
+		free(line);
+		line = get_next_line(0);
+		line_len = ft_strlen(line);
+	}
+	if (line)
+		free(line);
+	close(pipe_fds[1]);
+	return (pipe_fds[0]);
 }
 
 static int	check_files(int argc, char **argv, int fds[2])
@@ -67,20 +80,12 @@ static int	check_files(int argc, char **argv, int fds[2])
 	if (ft_strncmp(argv[1], HERE_DOC, sizeof(HERE_DOC)) == 0)
 	{
 		fds[0] = here_doc(argv[2]);
-		fds[1] = check_file(argv[1], O_WRONLY | O_CREAT, 0644);
+		fds[1] = check_file(argv[argc - 1], O_WRONLY | O_CREAT, 0644);
 	}
 	else
 	{
 		fds[0] = check_file(argv[1], O_RDONLY, 0);
 		fds[1] = check_file(argv[argc - 1], O_WRONLY | O_CREAT | O_TRUNC, 0644);
-	}
-	if (fds[0] == -1 || fds[1] == -1)
-	{
-		if (fds[0] != -1)
-			close(fds[0]);
-		if (fds[1] != -1)
-			close(fds[1]);
-		return (-1);
 	}
 	return (0);
 }
@@ -93,7 +98,10 @@ int	main(int argc, char **argv, char **envp)
 	check_args(argc, argv);
 	check_files(argc, argv, io_fds);
 	env_path(envp, PATH_INIT);
-	status = execute_commands(io_fds[0], io_fds[1], argv + 2, argc - 3);
+	if (ft_strncmp(argv[1], HERE_DOC, sizeof(HERE_DOC)) == 0)
+		status = execute_commands(io_fds, argv + 3, argc - 4);
+	else
+		status = execute_commands(io_fds, argv + 2, argc - 3);
 	env_path(envp, PATH_CLEAN);
-	exit(status);
+	return (status);
 }

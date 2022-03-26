@@ -36,3 +36,11 @@ int	ft_isquote(int c)
 		return (1);
 	return (0);
 }
+
+void	close_pipe(int fds[2])
+{
+	if (fds[0] != -1)
+		close(fds[0]);
+	if (fds[1] != -1)
+		close(fds[1]);
+}

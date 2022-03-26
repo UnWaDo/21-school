@@ -18,21 +18,6 @@ static int	print_s(char *str)
 	return (write(2, str, ft_strlen(str)));
 }
 
-static void	reverse_mem(char *mem, size_t len)
-{
-	size_t	i;
-	char	tmp;
-
-	i = 0;
-	while (i < len / 2)
-	{
-		tmp = mem[i];
-		mem[i] = mem[len - i];
-		mem[len - i] = tmp;
-		i++;
-	}
-}
-
 #define MAX_INT_LEN	10
 
 static int	print_d(int d)
@@ -52,7 +37,6 @@ static int	print_d(int d)
 		len++;
 	}
 	num[MAX_INT_LEN - len] = -(d % 10) + '0';
-	reverse_mem(num + MAX_INT_LEN - len, len);
 	return (write(2, num + MAX_INT_LEN - len, len));
 }
 

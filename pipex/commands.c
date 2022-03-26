@@ -25,7 +25,7 @@ static char	*check_path(const char *dir, const char *file)
 	return (NULL);
 }
 
-static char	*get_full_path(const char *command)
+static char	*get_full_path(char *cmd_name)
 {
 	char	**paths;
 	char	*path;
@@ -38,12 +38,12 @@ static char	*get_full_path(const char *command)
 	path = NULL;
 	while (paths[i])
 	{
-		path = check_path(paths[i], command);
+		path = check_path(paths[i], cmd_name);
 		if (path)
-			break ;
+			return (path);
 		i++;
 	}
-	return (path);
+	return (cmd_name);
 }
 
 char	**parse_command(const char *command)
@@ -59,11 +59,11 @@ char	**parse_command(const char *command)
 	path = get_full_path(args[0]);
 	if (path == NULL)
 	{
-		printf_err(INVALID_COMMAND_ERROR, args[0]);
 		clean_strings(args);
 		return (NULL);
 	}
-	free(args[0]);
+	if (path != args[0])
+		free(args[0]);
 	args[0] = path;
 	return (args);
 }
